@@ -21,8 +21,12 @@ app.use('/api/auth', userregisteration)
 app.use('/api/userlogin', userlogin )
 app.use('/api/user-ads',userads  )
 app.use('/api/product/details',adsdetails  )
+
+
+
+
 app.get('/', (req, res) => {
-  res.send('Hello from Express!');
+  res.send('Hello from Express! Mera ywr pindi da mera dildar pindi da');
 });
 
 const PORT =5000;

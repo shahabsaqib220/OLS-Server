@@ -1,0 +1,28 @@
+# .gitignore
+
+# Ignore environment variable file
+.env
+
+# Ignore Firebase service account JSON file (if you still have it)
+
+
+# Optionally, you might want to ignore other files or directories:
+# Node modules
+node_modules/
+
+# Build output
+dist/
+build/
+
+# Logs
+logs
+*.log
+
+# Temporary files
+temp/
+tmp/
+
+# IDE specific files (e.g., Visual Studio Code, JetBrains)
+.vscode/
+.idea/
+.vercel

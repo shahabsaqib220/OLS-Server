@@ -4,7 +4,7 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 require('dotenv').config()
 const bodyParser = require('body-parser');
-const userregisteration = require('./modules/user-registration/user-registration-model')
+const userregisteration = require('./modules/user-registration/main-router')
 
 
 

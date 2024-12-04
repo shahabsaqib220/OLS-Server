@@ -4,7 +4,8 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 require('dotenv').config()
 const bodyParser = require('body-parser');
-const userregisteration = require('./modules/user-registration/main-router')
+const userregisteration = require('./modules/user-registration/main-router');
+const connectDB = require('./db');
 
 
 
@@ -25,20 +26,7 @@ const PORT =5000;
 
 
 
-const connectDB = async () => {
-    try {
-      await mongoose.connect(process.env.MONGO_DB_URL, {
-        useNewUrlParser: true,
-  useUnifiedTopology: true,
-  serverSelectionTimeoutMS: 5000,  // Set the timeout to 5 seconds
-  socketTimeoutMS: 45000,
-      });
-      console.log('MongoDB Connected');
-    } catch (error) {
-      console.error('Error while connecting:', error);
-    }
-  };
   app.listen(PORT, () => {
     console.log(`Server running on PORT ${PORT}`);
-    connectDB();
+    
   });

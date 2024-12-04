@@ -1,6 +1,7 @@
 const nodemailer = require('nodemailer');
 const Otp = require('./user-registration-otp-model'); // OTP Model
 const User = require('./user-registration-model'); // User Model
+const connectDB = require('../../db');
 require('dotenv').config();
 
 const transporter = nodemailer.createTransport({
@@ -10,6 +11,9 @@ const transporter = nodemailer.createTransport({
     pass: process.env.EMAIL_PASSWORD, // App-specific password
   },
 });
+
+connectDB();
+
 
 const sendOtp = async (req, res) => {
   const { email } = req.body;

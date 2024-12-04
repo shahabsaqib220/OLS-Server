@@ -6,6 +6,7 @@ require('dotenv').config()
 const bodyParser = require('body-parser');
 const userregisteration = require('./modules/user-registration/main-router');
 const userlogin = require("./modules/user-login/main-router")
+const userads = require('./modules/user-ads/main-router')
 const connectDB = require('./db');
 
 
@@ -17,6 +18,7 @@ app.use(cors());
 
 app.use('/api/auth', userregisteration)
 app.use('/api/userlogin', userlogin )
+app.use('/api/user-ads',userads  )
 app.get('/', (req, res) => {
   res.send('Hello from Express!');
 });

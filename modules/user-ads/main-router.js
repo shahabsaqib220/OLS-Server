@@ -1,17 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const multer = require('multer');
-const path = require('path');
-const admin = require('firebase-admin');
-const storage = multer.memoryStorage(); // Store files in memory temporarily
-const upload = multer({ storage });
-const authMiddleware = require('../middlewares/auth-middleware');
-const {allads,userpostads} = require("./users-ads-router")
+const { allads, userpostads, upload } = require('./users-ads-router'); // Ensure correct path
 
-router.get('/ads', allads )
-router.post('/postads',authMiddleware, upload.array('images', 5), userpostads);
+const authMiddleware = require('../middlewares/auth-middleware'); // Your authentication middleware
 
+router.post('/postads', authMiddleware, upload.array('images', 5), userpostads);
 
-
+router.get('/ads', allads); // Example for fetching ads
 
 module.exports = router;

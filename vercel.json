@@ -15,7 +15,7 @@
   "functions": {
     "index.js": {
       "memory": 512,
-      "maxDuration": 20
+      "maxDuration": 10
     }
   }
 }

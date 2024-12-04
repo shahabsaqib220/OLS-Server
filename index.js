@@ -8,6 +8,7 @@ const userregisteration = require('./modules/user-registration/main-router');
 const userlogin = require("./modules/user-login/main-router")
 const userads = require('./modules/user-ads/main-router')
 const connectDB = require('./db');
+const adsdetails = require("./modules/details-of-product/main-router")
 
 
 
@@ -19,6 +20,7 @@ app.use(cors());
 app.use('/api/auth', userregisteration)
 app.use('/api/userlogin', userlogin )
 app.use('/api/user-ads',userads  )
+app.use('/api/product/details',adsdetails  )
 app.get('/', (req, res) => {
   res.send('Hello from Express!');
 });

@@ -47,10 +47,23 @@ const adsdetails = async (req, res) => {
   }
 };
 
+const posted_by_user_profile = async (req,res) =>{
+  try {
+    const user = await User.findById(req.user.id);
+    if (user) {
+      res.status(200).json({ imageUrl: user.profileImageUrl });
+    } else {
+      res.status(404).json({ message: 'User not found wow by wow' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+}
+
 
   
 
 
-  module.exports = { adsdetails, other_related_product }
+  module.exports = { adsdetails, other_related_product, posted_by_user_profile }
 
 

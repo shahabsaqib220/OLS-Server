@@ -3,6 +3,9 @@ const path = require('path');
 const admin = require('firebase-admin');
 const Ad = require('../user-ads/users-ads-model');
 const connectDB = require('../../db');
+const admin = require("../controllers/service-account"); // Firebase admin instance
+const multer = require("multer");
+const { v4: uuidv4 } = require("uuid"); 
 
 // Initialize Firebase storage bucket
 const bucket = admin.storage().bucket();

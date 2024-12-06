@@ -16,7 +16,7 @@ router.delete('/deletead/:id', authMiddleware, deleteuserad); // Example for del
 
 router.get('/edit/user/ad/:id', authMiddleware, usereditads);
 
-router.put('/edit/user/exiting/ad:id', authMiddleware, upload.array('images', 5), update_user_edited_ad )
+router.put('/edit/user/exiting/ad/:id', authMiddleware, upload.array('images', 5), update_user_edited_ad )
 
 router.get('/all/ads', allads); // Example for fetching ads
 

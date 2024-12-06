@@ -8,6 +8,7 @@ const userregisteration = require('./modules/user-registration/main-router');
 const userlogin = require("./modules/user-login/main-router")
 const userads = require('./modules/user-ads/main-router')
 const connectDB = require('./db');
+const user_updated_ad = require("./modules/user-existing-edited-ad/main-router")
 const adsdetails = require("./modules/details-of-product/main-router")
 
 
@@ -21,6 +22,8 @@ app.use('/api/auth', userregisteration)
 app.use('/api/userlogin', userlogin )
 app.use('/api/user-ads',userads  )
 app.use('/api/product/details',adsdetails  )
+app.use('/api/updated/user', user_updated_ad)
+
 
 
 

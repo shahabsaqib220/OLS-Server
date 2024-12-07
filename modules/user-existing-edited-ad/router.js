@@ -138,11 +138,46 @@ const delete_user_ad = async (req,res) =>{
   }
 };
 
+const user_sold_out_product = async (req, res) => {
+
+  try {
+    const page = parseInt(req.query.page) || 1; // Current page number
+    const limit = parseInt(req.query.limit) || 10; // Number of ads per page
+
+    // Calculate the starting index for pagination
+    const startIndex = (page - 1) * limit;
+
+    // Fetch ads where adStatus is true
+    const ads = await Ad.find({ adStatus: "sold" })
+      .skip(startIndex)
+      .limit(limit);
+
+    // Get the total count of ads
+    const totalAds = await Ad.countDocuments({ adStatus: "available" });
+
+    // Return paginated ads
+    res.status(200).json({
+      ads,
+      totalAds,
+      currentPage: page,
+      totalPages: Math.ceil(totalAds / limit),
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching ads', error });
+  }
+};
+
+
+
+
+
+
+
 
 
 
 
 
 module.exports = {
-    update_user_edited_ad, upload, delete_user_ad
+    update_user_edited_ad, upload, delete_user_ad, user_sold_out_product
 };

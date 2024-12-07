@@ -1,6 +1,11 @@
 
+const connectDB = require("../../db");
 const User = require("../user-registration/user-registration-model");
 const crypto = require("crypto");
+
+
+
+connectDB();
 
 
 const get_user_security_questions = async (req, res) =>{

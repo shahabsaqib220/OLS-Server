@@ -17,7 +17,11 @@ const securityOptions = require("./modules/user-change-password/main-router")
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:3000', // Replace with your client's URL
+  methods: ['GET', 'POST', 'PUT', 'DELETE'], // Add methods you need
+  credentials: true // Include if using cookies or authentication headers
+}));
 
 app.use('/api/auth', userregisteration)
 app.use('/api/userlogin', userlogin )

@@ -4,6 +4,8 @@ const User = require("../user-registration/user-registration-model");
 const crypto = require("crypto");
 
 
+console.log("I am connect by the update password Module")
+
 
 connectDB();
 

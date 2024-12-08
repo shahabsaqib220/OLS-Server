@@ -69,6 +69,30 @@ const get_user_security_questions = async (req, res) =>{
           });
       }
   };
+
+  const users_old_password_vaerification = async (req, res) => {
+    const { email, oldPassword } = req.body;  // Changed 'password' to 'oldPassword'
+
+    try {
+      const user = await User.findOne({ email });
+      if (!user) {
+        return res.status(404).json({ success: false, message: 'User not found' });
+      }
+  
+      const isMatch = await bcrypt.compare(oldPassword, user.password);  // Compare with 'oldPassword'
+      if (!isMatch) {
+        return res.status(400).json({ success: false, message: 'Incorrect password' });
+      }
+  
+      return res.json({ success: true });
+    } catch (error) {
+      return res.status(500).json({ success: false, message: 'Server error', error });
+    }
+  };
+
+
+
+  
   
   
 
@@ -107,4 +131,4 @@ const get_user_security_questions = async (req, res) =>{
 
 
 
-    module.exports = { get_user_security_questions, verify_user_security_answers, update_user_password }
+    module.exports = { get_user_security_questions, verify_user_security_answers,users_old_password_vaerification, update_user_password }

@@ -98,13 +98,13 @@ const get_user_security_questions = async (req, res) =>{
 
 
       const update_user_password = async (req, res) => {
+        const { email, password } = req.body;
         if (!email || !password) {
             return res.status(400).json({ message: 'Email and new password are required' });
           }
         
           try {
             const user = await User.findOne({ email });
-            console.log(user);
             if (!user) {
               return res.status(404).json({ message: 'User not found' });
             }

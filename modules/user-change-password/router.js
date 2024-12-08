@@ -119,6 +119,61 @@ const get_user_security_questions = async (req, res) =>{
             res.status(500).json({ message: 'Server error while updating password' });
           }
         };
+
+
+        const update_user_security_questions = async (req,res) =>{
+
+          const { email, newQuestions, newAnswers } = req.body;
+
+          try {
+            // Step 1: Find the user by email
+            const user = await User.findOne({ email });
+        
+            if (!user) {
+              return res.status(404).json({ success: false, message: 'User not found.' });
+            }
+        
+            // Step 2: Validate that the questions are not the same
+            if (newQuestions.question1 === newQuestions.question2) {
+              return res.status(400).json({ success: false, message: 'Security questions must be different.' });
+            }
+        
+            if (!newAnswers.answer1 || !newAnswers.answer2) {
+              return res.status(400).json({ success: false, message: 'Answers must not be empty.' });
+            }
+        
+            // Step 3: Hash the new answers
+            const hashedAnswer1 = await bcrypt.hash(newAnswers.answer1, 10);
+            const hashedAnswer2 = await bcrypt.hash(newAnswers.answer2, 10);
+        
+            // Update the user's security questions and hashed answers
+            user.securityQuestions = [
+              { question: newQuestions.question1, answer: hashedAnswer1 },
+              { question: newQuestions.question2, answer: hashedAnswer2 }
+            ];
+        
+            // Save the updated user information
+            await user.save();
+        
+            // Step 4: Return success response
+            return res.status(200).json({
+              success: true,
+              message: 'Security questions updated successfully.',
+            });
+        
+          } catch (error) {
+            // Handle any errors
+            console.error(error);
+            return res.status(500).json({
+              success: false,
+              message: 'Internal server error.',
+            });
+          }
+        };
+
+
+
+        
       
       
 
@@ -131,4 +186,4 @@ const get_user_security_questions = async (req, res) =>{
 
 
 
-    module.exports = { get_user_security_questions, verify_user_security_answers,users_old_password_vaerification, update_user_password }
+    module.exports = { get_user_security_questions, verify_user_security_answers,users_old_password_vaerification, update_user_password, update_user_security_questions }

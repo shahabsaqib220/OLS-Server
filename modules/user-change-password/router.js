@@ -2,7 +2,7 @@
 const connectDB = require("../../db");
 const User = require("../user-registration/user-registration-model");
 const crypto = require("crypto");
-
+const bcrypt =require("bcrypt");
 
 console.log("I am connect by the update password Module")
 
@@ -27,24 +27,50 @@ const get_user_security_questions = async (req, res) =>{
     };
 
     const verify_user_security_answers = async (req, res) => {
-
-        const { answers } = req.body;
-        try {
+      const { answers } = req.body;
+  
+      try {
+          if (!answers || typeof answers !== 'object') {
+              return res.status(400).json({ message: 'Answers are missing or invalid in the request body' });
+          }
+  
           const user = await User.findById(req.userId);
-          if (!user) return res.status(404).json({ message: 'User not found' });
-      
+  
+          if (!user) {
+              return res.status(404).json({ message: 'User not found' });
+          }
+  
+          if (!user.securityQuestions || user.securityQuestions.length === 0) {
+              return res.status(400).json({ message: 'No security questions found for the user' });
+          }
+  
           // Check each answer against the hashed answer in the database
           for (const question of user.securityQuestions) {
-            if (!await bcrypt.compare(answers[question._id], question.answer)) {
-              return res.status(400).json({ message: 'Incorrect answer to a security question' });
-            }
+              if (!answers[question._id]) {
+                  return res.status(400).json({ 
+                      message: `Answer for question ID ${question._id} is missing` 
+                  });
+              }
+  
+              const answerMatch = await bcrypt.compare(answers[question._id], question.answer);
+              if (!answerMatch) {
+                  return res.status(400).json({ 
+                      message: `Incorrect answer to question ID: ${question._id}` 
+                  });
+              }
           }
-      
+  
           res.json({ success: true });
-        } catch (err) {
-          res.status(500).json({ error: 'Server error' });
-        }
-      };
+      } catch (err) {
+          console.error('Error verifying security answers:', err.message); // Log error for debugging
+          return res.status(500).json({ 
+              error: 'An unexpected error occurred', 
+              details: err.message 
+          });
+      }
+  };
+  
+  
 
 
       const update_user_password = async (req, res) => {

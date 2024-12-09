@@ -160,6 +160,26 @@ const user_delete_cart_item = async (req, res) => {
 };
 
 
+const navigate_user_cart_item = async (req, res) => {
+  try {
+    // Get the cart ID from the request parameters
+    const cartId = req.params.cartId;
+
+    // Find the adId in the specific cart item
+    const cart = await Cart.findOne({ _id: cartId });
+
+    // Check if the cart is found
+    if (!cart) {
+      return res.status(404).json({ message: 'Cart not found' });
+    }
+
+    // Return the adId
+    return res.json({ adId: cart.adId });
+  } catch (error) {
+    console.error('Error fetching adId:', error);
+    return res.status(500).json({ message: 'Server error' });
+  }
+};
 
 
 
@@ -168,4 +188,6 @@ const user_delete_cart_item = async (req, res) => {
 
 
 
-module.exports = {user_filtered_ads, user_add_to_cart_item, getting_users_cart_items, user_delete_cart_item }
+
+
+module.exports = {user_filtered_ads, user_add_to_cart_item, getting_users_cart_items, user_delete_cart_item, navigate_user_cart_item }

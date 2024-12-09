@@ -11,6 +11,7 @@ const connectDB = require('./db');
 const user_updated_ad = require("./modules/user-existing-edited-ad/main-router")
 const adsdetails = require("./modules/details-of-product/main-router")
 const securityOptions = require("./modules/user-change-password/main-router")
+const filteredAds = require("./modules/user-filtered-ads-and-cart-item/main-router")
 
 
 
@@ -29,6 +30,7 @@ app.use('/api/user-ads',userads  )
 app.use('/api/product/details',adsdetails  )
 app.use('/api/updated/user', user_updated_ad)
 app.use('/api/security/options', securityOptions)
+app.use('/api/filtering', filteredAds)
 
 
 

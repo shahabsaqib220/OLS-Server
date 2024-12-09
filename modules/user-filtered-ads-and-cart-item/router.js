@@ -2,8 +2,8 @@
 
 // routes/ads.js
 const express = require('express');
-const router = express.Router();
-const Ad = require('../user-ads/users-ads-router'); 
+
+const Ad = require('../user-ads/users-ads-model'); 
 const connectDB = require('../../db');
 
 connectDB();

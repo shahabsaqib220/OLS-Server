@@ -19,7 +19,7 @@ const filteredAds = require("./modules/user-filtered-ads-and-cart-item/main-rout
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(cors({
-  origin: 'http://localhost:3000', // Replace with your client's URL
+  origin: 'https://buy-sell-product-client.vercel.app', // Replace with your client's URL
   methods: ['GET', 'POST', 'PUT', 'DELETE'], // Add methods you need
   credentials: true // Include if using cookies or authentication headers
 }));

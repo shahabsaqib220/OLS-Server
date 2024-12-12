@@ -29,14 +29,35 @@ const userpostads = async (req, res) => {
   try {
     const { category, brand, model, price, description, condition, MobilePhone, location } = req.body;
 
-    console.log(req.body); // Debugging request body data
+   
 
-    if (!category || !brand || !model || !price || !description || !condition || !MobilePhone || !location) {
-      return res.status(400).json({ message: "All fields are required" });
+    // Validate required fields
+    if (!category || !brand || !price || !description || !condition || !MobilePhone || !location) {
+      return res.status(400).json({ message: "All fields are required except model" });
     }
 
     if (!req.files || req.files.length === 0) {
       return res.status(400).json({ message: "At least one image is required" });
+    }
+
+    // Parse location data
+    let locationData;
+    try {
+      locationData = JSON.parse(location);
+    } catch (error) {
+      console.error("Error parsing location data:", error.message);
+      return res.status(400).json({ message: "Invalid location data format" });
+    }
+
+    // Validate location format
+    if (!locationData.readable || typeof locationData.readable !== "string") {
+      return res.status(400).json({ message: "Invalid city name provided" });
+    }
+
+    // If coordinates are missing or invalid, set them to a default value [0, 0]
+    if (!Array.isArray(locationData.coordinates) || locationData.coordinates.length !== 2 || 
+        typeof locationData.coordinates[0] !== "number" || typeof locationData.coordinates[1] !== "number") {
+      locationData.coordinates = [0, 0];  // Default to [0, 0] if coordinates are invalid
     }
 
     const imageUrls = [];
@@ -53,12 +74,12 @@ const userpostads = async (req, res) => {
             },
           });
 
-          blobStream.on('error', (error) => {
-            console.error('Error uploading file to Firebase:', error);
-            return reject(res.status(500).json({ message: 'Error uploading image' }));
+          blobStream.on("error", (error) => {
+            console.error("Error uploading file to Firebase:", error);
+            return reject(res.status(500).json({ message: "Error uploading image" }));
           });
 
-          blobStream.on('finish', async () => {
+          blobStream.on("finish", async () => {
             const publicUrl = `https://storage.googleapis.com/${bucket.name}/${firebaseFileName}`;
             imageUrls.push(publicUrl);
             resolve();
@@ -69,37 +90,38 @@ const userpostads = async (req, res) => {
       })
     );
 
-    const locationData = JSON.parse(location);
+    // If model is not provided, set it to an empty string
+    const adModel = model || "";
 
-    if (!locationData.readable || !Array.isArray(locationData.coordinates) || locationData.coordinates.length !== 2) {
-      return res.status(400).json({ message: "Invalid location data provided" });
-    }
-
+    // Create the new Ad document
     const newAd = new Ad({
       userId: req.userId,
       category,
       brand,
-      model,
+      model: adModel,  // Use the model or empty string if not provided
       MobilePhone,
       price,
       description,
       location: {
-        type: locationData.type || 'Point',
-        coordinates: locationData.coordinates,
-        readable: locationData.readable
+        type: locationData.type || "Point", // Default type to "Point" if not provided
+        coordinates: locationData.coordinates, // Ensure valid coordinates
+        readable: locationData.readable, // City name
       },
       condition,
       images: imageUrls,
-      adStatus: "available"
+      adStatus: "available",
     });
 
     const savedAd = await newAd.save();
     return res.status(201).json(savedAd);
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: 'Server error' });
+    console.error("Server error:", error.message); // Log the actual error message
+    return res.status(500).json({ message: "Server error" });
   }
 };
+
+
+
 
 
 

@@ -16,8 +16,9 @@ const adsSchema = new mongoose.Schema({
   },
   model: { 
     type: String, 
-    required: true 
+    required: false  // Make it optional
   },
+  
   price: { 
     type: Number, 
     required: true 

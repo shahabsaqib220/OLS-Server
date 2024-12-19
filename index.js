@@ -14,12 +14,12 @@ const securityOptions = require("./modules/user-change-password/main-router")
 const filteredAds = require("./modules/user-filtered-ads-and-cart-item/main-router")
 
 
+// Production Level API: "https://buy-sell-product-client.vercel.app"
 
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(cors({
-  // Production Level API: ""
   origin: 'https://buy-sell-product-client.vercel.app', // Replace with your client's URL
   methods: ['GET', 'POST', 'PUT', 'DELETE'], // Add methods you need
   credentials: true // Include if using cookies or authentication headers

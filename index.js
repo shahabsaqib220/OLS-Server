@@ -55,7 +55,7 @@ const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
     origin: "https://buy-sell-product-client.vercel.app", // Adjust to match your frontend URL
-    methods: ["GET", "POST"]
+    methods: ["GET", "POST","PUT"]
   },
   transports: ["polling"] // Force long polling
 });

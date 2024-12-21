@@ -17,16 +17,29 @@ const adsdetails = require("./modules/details-of-product/main-router");
 const securityOptions = require("./modules/user-change-password/main-router");
 const filteredAds = require("./modules/user-filtered-ads-and-cart-item/main-router");
 const userChatsRouter = require("./modules/users-chats/user-chats-router");
+const attachIO = require('./modules/controllers/socketMiddleware'); // Middleware to attach Socket.IO
+const initializeSockets = require('./modules/controllers/socketController'); 
 
 // Connect to MongoDB
 connectDB();
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin:"http://localhost:3000",
+    methods: ["GET", "POST", "PUT"],
+  },
+  transports: ["websocket", "polling"], // Enable WebSocket for better performance
+});
+
+// Attach Socket.IO instance to req object
+attachIO(app, io);
 
 // Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(
   cors({
-    origin: "https://buy-sell-product-client.vercel.app", // Replace with your production client's URL
+    origin: "http://localhost:3000", // Replace with your production client's URL
     methods: ['GET', 'POST', 'PUT', 'DELETE'], // Specify the methods you need
     credentials: true, // If using cookies or authentication headers
   })
@@ -49,54 +62,12 @@ app.get("/", (req, res) => {
 
 // Fontend route "https://buy-sell-product-client.vercel.app"
 
-// Create HTTP server and initialize Socket.IO
-const server = http.createServer(app);
-
-const io = new Server(server, {
-  cors: {
-    origin: "https://buy-sell-product-client.vercel.app", // Adjust to match your frontend URL
-    methods: ["GET", "POST","PUT"]
-  },
-  transports: ["polling"] // Force long polling
-});
 
 
-// Attach Socket.IO instance to requests
-app.use((req, res, next) => {
-  req.io = io;
-  next();
-});
 
-// Socket.IO logic
-io.on('connection', (socket) => {
-  console.log('New client connected:', socket.id);
 
-  socket.on('joinRoom', (userId) => {
-    socket.join(userId);
-    console.log(`User ${userId} joined room ${userId}`);
-  });
-
-  socket.on('startTyping', (data) => {
-    const { receiverId } = data;
-    io.to(receiverId).emit('typing', data);
-  });
-
-  socket.on('stopTyping', (data) => {
-    const { receiverId } = data;
-    io.to(receiverId).emit('stopTyping', data);
-  });
-
-  socket.on('markAsSeen', (data) => {
-    const { messageIds, senderId } = data; // Ensure you send senderId with the messageIds
-    messageIds.forEach((messageId) => {
-      io.to(senderId).emit('messageSeen', { _id: messageId, seen: true, seenAt: new Date() });
-    });
-  });
-
-  socket.on('disconnect', () => {
-    console.log('Client disconnected:', socket.id);
-  });
-});
+// Initialize Socket.IO logic
+initializeSockets(io);
 
 // Export and Run Server
 module.exports = app; // Export app for serverless environments

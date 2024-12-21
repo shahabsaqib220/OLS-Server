@@ -131,19 +131,27 @@ const markAsSeen = async (req, res) => {
   const { messageIds } = req.body;
 
   try {
-    const messages = await Message.updateMany(
+    // Update the messages
+    const updateResult = await Message.updateMany(
       { _id: { $in: messageIds } },
       { seen: true, seenAt: new Date() }
     );
 
-    if (!messages.matchedCount) {
+    if (!updateResult.matchedCount) {
       return res.status(404).json({ error: 'No messages found to update' });
     }
 
+    // Fetch the updated messages to get senderId
+    const updatedMessages = await Message.find({ _id: { $in: messageIds } });
+
     // Emit the message seen event for each message
-    messageIds.forEach((messageId) => {
-      const updatedMessage = { _id: messageId, seen: true, seenAt: new Date() };
-      req.io.to(updatedMessage.senderId).emit('messageSeen', updatedMessage); // Notify the sender
+    updatedMessages.forEach((message) => {
+      const updatedMessage = {
+        _id: message._id,
+        seen: true,
+        seenAt: new Date(),
+      };
+      req.io.to(message.senderId.toString()).emit('messageSeen', updatedMessage); // Notify the sender
     });
 
     res.json({ success: true, message: 'Messages marked as seen' });
@@ -152,6 +160,8 @@ const markAsSeen = async (req, res) => {
     res.status(500).json({ error: 'Server error' });
   }
 };
+
+
 
 // Controller: Delete a message
 const deleteMessage = async (req, res) => {

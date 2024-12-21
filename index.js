@@ -26,7 +26,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(
   cors({
-    origin: "http://localhost:3000", // Replace with your production client's URL
+    origin: "https://buy-sell-product-client.vercel.app", // Replace with your production client's URL
     methods: ['GET', 'POST', 'PUT', 'DELETE'], // Specify the methods you need
     credentials: true, // If using cookies or authentication headers
   })
@@ -54,10 +54,12 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin:"http://localhost:3000" ,
+    origin: "https://buy-sell-product-client.vercel.app", // Adjust to match your frontend URL
     methods: ["GET", "POST"]
-  }
+  },
+  transports: ["polling"] // Force long polling
 });
+
 
 // Attach Socket.IO instance to requests
 app.use((req, res, next) => {

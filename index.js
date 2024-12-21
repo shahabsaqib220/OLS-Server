@@ -25,7 +25,7 @@ connectDB();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin:"http://localhost:3000",
+    origin:"https://buy-sell-product-client.vercel.app",
     methods: ["GET", "POST", "PUT"],
   },
   transports: ["websocket", "polling"], // Enable WebSocket for better performance
@@ -33,18 +33,18 @@ const io = new Server(server, {
 
 // Attach Socket.IO instance to req object
 attachIO(app, io);
-
 // Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
+
 app.use(bodyParser.json());
+
 app.use(
   cors({
-    origin: "http://localhost:3000", // Replace with your production client's URL
+    origin: "https://buy-sell-product-client.vercel.app", // Replace with your production client's URL
     methods: ['GET', 'POST', 'PUT', 'DELETE'], // Specify the methods you need
     credentials: true, // If using cookies or authentication headers
   })
 );
-
 // Routes
 app.use('/api/auth', userregisteration);
 app.use('/api/userlogin', userlogin);

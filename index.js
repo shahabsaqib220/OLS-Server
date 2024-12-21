@@ -51,8 +51,9 @@ app.get("/", (req, res) => {
 const server = http.createServer(app);
 
 const io = new Server(server, {
+  path: '/socket.io',
   cors: {
-    origin: "https://buy-sell-product-client.vercel.app", // Adjust to your frontend URL
+    origin: "https://buy-sell-product-client.vercel.app", // Your frontend URL
     methods: ["GET", "POST", "PUT"],
   },
 });

@@ -16,9 +16,8 @@ const adsSchema = new mongoose.Schema({
   },
   model: { 
     type: String, 
-    required: false  // Make it optional
+    required: false // Make it optional
   },
-  
   price: { 
     type: Number, 
     required: true 
@@ -58,7 +57,28 @@ const adsSchema = new mongoose.Schema({
   createdAt: { 
     type: Date, 
     default: Date.now 
+  },
+  basic: { 
+    type: Boolean, 
+    default: false 
+  },
+  standard: { 
+    type: Boolean, 
+    default: false 
+  },
+  premium: { 
+    type: Boolean, 
+    default: false 
   }
+});
+
+// Custom validation to ensure only one of basic, standard, or premium is true
+adsSchema.pre('save', function (next) {
+  const count = [this.basic, this.standard, this.premium].filter(Boolean).length;
+  if (count > 1) {
+    return next(new Error('Only one of basic, standard, or premium can be true.'));
+  }
+  next();
 });
 
 // Create a geospatial index on the 'location' field

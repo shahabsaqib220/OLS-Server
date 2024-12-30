@@ -19,6 +19,7 @@ const filteredAds = require("./modules/user-filtered-ads-and-cart-item/main-rout
 const userChatsRouter = require("./modules/users-chats/user-chats-router");
 const attachIO = require('./modules/controllers/socketMiddleware'); // Middleware to attach Socket.IO
 const initializeSockets = require('./modules/controllers/socketController'); 
+const userSellFastRouter = require("./modules/users-sell-fast-ads/router")
 
 // Connect to MongoDB
 connectDB();
@@ -38,6 +39,11 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(bodyParser.json());
 
+// https://buy-sell-product-client.vercel.app
+
+// Local API : "http://localhost:5000"
+
+
 app.use(
   cors({
     origin: "https://buy-sell-product-client.vercel.app", // Replace with your production client's URL
@@ -54,6 +60,7 @@ app.use('/api/updated/user', user_updated_ad);
 app.use('/api/security/options', securityOptions);
 app.use('/api/filtering', filteredAds);
 app.use('/api/users-chats', userChatsRouter);
+app.use('/api/users-fast', userSellFastRouter);
 
 // Health check route
 app.get("/", (req, res) => {

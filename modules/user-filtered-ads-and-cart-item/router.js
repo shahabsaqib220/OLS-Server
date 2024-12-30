@@ -181,18 +181,21 @@ const navigate_user_cart_item = async (req, res) => {
   }
 };
 
-const user_other_related_catagory = async (req, res) => {
-  try {
-      // Fetch products by category and ensure adStatus is "available"
-      const products = await Ad.find({ 
-          category: req.params.category,
-          adStatus: "available"  // Only fetch products with status "available"
-      }).limit(5); // Fetch up to 5 products
 
-      res.json(products);
+
+const user_other_related_category = async (req, res) => {
+  try {
+    // Fetch all ads filtered by category and ensure adStatus is "available"
+    const products = await Ad.find({ 
+      category: req.params.category,
+      adStatus: "available" // Ensure only "available" ads are returned
+    });
+
+    // Return the fetched products
+    res.json(products);
   } catch (error) {
-      console.error("Error fetching available products:", error); // Log the error for debugging
-      res.status(500).json({ message: 'Error fetching available products' });
+    console.error("Error fetching related ads:", error); // Log error for debugging
+    res.status(500).json({ message: 'Error fetching related ads' });
   }
 };
 
@@ -205,4 +208,5 @@ const user_other_related_catagory = async (req, res) => {
 
 
 
-module.exports = {user_filtered_ads, user_add_to_cart_item, getting_users_cart_items, user_delete_cart_item, navigate_user_cart_item,user_other_related_catagory }
+
+module.exports = {user_filtered_ads, user_add_to_cart_item, getting_users_cart_items, user_delete_cart_item, navigate_user_cart_item,user_other_related_category }

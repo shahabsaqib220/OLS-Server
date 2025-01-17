@@ -101,6 +101,11 @@ const update_user_edited_ad = async (req, res) => {
       };
     }
 
+    // Reset premium, standard, and basic values to false
+    updateData.premium = false;
+    updateData.standard = false;
+    updateData.basic = false;
+
     // Update the ad in the database
     const updatedAd = await Ad.findByIdAndUpdate(adId, updateData, {
       new: true,

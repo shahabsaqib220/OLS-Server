@@ -41,7 +41,7 @@ app.use(bodyParser.json());
 
 // https://buy-sell-product-client.vercel.app
 
-// Local API : "http://localhost:5000"
+// Local API : "http://localhost:3000"
 
 
 app.use(

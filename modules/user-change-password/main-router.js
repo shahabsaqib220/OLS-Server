@@ -7,7 +7,7 @@ const {get_user_security_questions, verify_user_security_answers,users_old_passw
 
 
 
-router.get("/security-questions", authMiddleware, get_user_security_questions );
+router.get("/security-questions/:email", authMiddleware, get_user_security_questions );
 
 
 

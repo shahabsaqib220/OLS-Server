@@ -123,23 +123,53 @@ const update_user_edited_ad = async (req, res) => {
 };
 
 
-const delete_user_ad = async (req,res) =>{
+const delete_user_ad = async (req, res) => {
   const adId = req.params.id;
 
   try {
+    const ad = await Ad.findOne({ _id: adId });
+
+    if (!ad) {
+      return res.status(404).json({ message: "Ad not found!" });
+    }
+
+    // Delete images from Firebase Storage if they exist
+    if (ad.images && ad.images.length > 0) {
+      const bucket = admin.storage().bucket();
       
-      const ad = await Ad.findOne({ _id: adId }); 
+      // Create array of delete promises
+      const deletePromises = ad.images.map(imageUrl => {
+        try {
+          // Extract file path from Firebase Storage URL
+          const parsedUrl = new URL(imageUrl);
+          const filePath = decodeURIComponent(parsedUrl.pathname)
+            .split(`/${bucket.name}/`)
+            .pop();
 
-      if (!ad) {
-          return res.status(404).json({ message: "Ad not found!" });
-      }
+          const file = bucket.file(filePath);
+          return file.delete().then(() => {
+            console.log(`Deleted image from Firebase: ${filePath}`); // Log the deletion message
+          });
+        } catch (error) {
+          console.error('Error parsing URL:', error);
+          return Promise.resolve(); // Skip this deletion
+        }
+      });
 
-     
-      await Ad.findByIdAndDelete(adId);
-      return res.status(200).json({ message: "Ad has been deleted" });
+      // Wait for all deletions to complete (or fail)
+      await Promise.allSettled(deletePromises);
+    }
+
+    // Delete the ad from MongoDB
+    await Ad.findByIdAndDelete(adId);
+    return res.status(200).json({ message: "Ad has been deleted" });
 
   } catch (error) {
-      return res.status(500).json({ message: "Server Error", error });
+    console.error('Error deleting ad:', error);
+    return res.status(500).json({ 
+      message: "Server Error",
+      error: error.message 
+    });
   }
 };
 

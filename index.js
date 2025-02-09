@@ -5,6 +5,8 @@ const http = require('http');
 const { Server } = require('socket.io');
 const cors = require("cors");
 require('dotenv').config();
+// require('./modules/utils/scheduler'); // Start the scheduler
+
 const bodyParser = require('body-parser');
 
 // Import routes

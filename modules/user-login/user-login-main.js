@@ -33,7 +33,9 @@ const useruserlogin = async (req, res) => {
           name: user.name,
           email: user.email,
           ads: user.ads,
+
         },
+        
       });
     } catch (error) {
       console.error('Login error:', error.message);

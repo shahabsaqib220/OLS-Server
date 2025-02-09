@@ -58,19 +58,29 @@ const adsSchema = new mongoose.Schema({
     type: Date, 
     default: Date.now 
   },
-  basic: { 
-    type: Boolean, 
-    default: false 
+
+  
+  expiresAt: { 
+    type: Date, 
+    required: true, 
+    default: () => new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days
   },
-  standard: { 
-    type: Boolean, 
-    default: false 
-  },
+  
+
+
+  
   premium: { 
     type: Boolean, 
     default: false 
+  },
+
+  premiumUntil: { 
+    type: Date, 
+    default: null 
   }
 });
+
+
 
 // Custom validation to ensure only one of basic, standard, or premium is true
 adsSchema.pre('save', function (next) {
@@ -83,6 +93,28 @@ adsSchema.pre('save', function (next) {
 
 // Create a geospatial index on the 'location' field
 adsSchema.index({ location: '2dsphere' });
+
+// Function to update ad premium status and duration
+adsSchema.methods.activatePremium = function (days) {
+  const now = new Date();
+  
+  // Calculate remaining unpaid days
+  const remainingUnpaidDays = Math.max(0, (this.expiresAt - now) / (1000 * 60 * 60 * 24));
+
+  // Convert remaining unpaid days to premium days
+  const totalPremiumDays = remainingUnpaidDays + days;
+
+  // Update premium status
+  this.premium = true;
+  this.premiumUntil = new Date(now.getTime() + totalPremiumDays * 24 * 60 * 60 * 1000);
+  this.expiresAt = this.premiumUntil; // Set the new expiry date
+
+  return this.save();
+};
+
+
+
+
 
 const Ad = mongoose.model('Ad', adsSchema);
 

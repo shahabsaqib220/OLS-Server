@@ -11,67 +11,56 @@ connectDB();
 
 
 const get_user_security_questions = async (req, res) =>{
-
-    try {
-        const user = await User.findById(req.userId);
-        if (!user || !user.securityQuestions) {
-          return res.status(404).json({ message: 'No security questions found for this user' });
-        }
+  try {
+    const { email } = req.params; // Assuming email is passed as a URL parameter
     
-        // Only send the question text, not the hashed answers
-        const questions = user.securityQuestions.map(q => ({ _id: q._id, question: q.question }));
-        res.json({ questions });
-      } catch (err) {
-        res.status(500).json({ error: 'Server error' });
-      }
-    };
+    // Find the user by email
+    const user = await User.findOne({ email }, 'securityQuestions.questions');
+    
+    if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+    }
+    
+    res.status(200).json({ securityQuestions: user.securityQuestions.questions });
+} catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
+}
+
+
+}
+
+
+
 
     const verify_user_security_answers = async (req, res) => {
-      const { answers } = req.body;
-  
       try {
-          if (!answers || typeof answers !== 'object') {
-              return res.status(400).json({ message: 'Answers are missing or invalid in the request body' });
-          }
-  
-          const user = await User.findById(req.userId);
-  
-          if (!user) {
-              return res.status(404).json({ message: 'User not found' });
-          }
-  
-          if (!user.securityQuestions || user.securityQuestions.length === 0) {
-              return res.status(400).json({ message: 'No security questions found for the user' });
-          }
-  
-          // Check each answer against the hashed answer in the database
-          for (const question of user.securityQuestions) {
-              if (!answers[question._id]) {
-                  return res.status(400).json({ 
-                      message: `Answer for question ID ${question._id} is missing` 
-                  });
-              }
-  
-              const answerMatch = await bcrypt.compare(answers[question._id], question.answer);
-              if (!answerMatch) {
-                  return res.status(400).json({ 
-                      message: `Incorrect answer to question ID: ${question._id}` 
-                  });
-              }
-          }
-  
-          res.json({ success: true });
-      } catch (err) {
-          console.error('Error verifying security answers:', err.message); // Log error for debugging
-          return res.status(500).json({ 
-              error: 'An unexpected error occurred', 
-              details: err.message 
-          });
-      }
+        const { email } = req.body;
+        const { answers } = req.body; // Answers from user input (plain text)
+
+        // Find the user by email
+        const user = await User.findOne({ email });
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Compare entered security answers with stored hashed answers
+        const isMatch = await user.compareSecurityAnswers(answers);
+
+        if (!isMatch) {
+            return res.status(400).json({ message: 'Security answers do not match' });
+        }
+
+        res.status(200).json({ message: 'Security answers verified successfully' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
   };
 
   const users_old_password_vaerification = async (req, res) => {
-    const { email, oldPassword } = req.body;  // Changed 'password' to 'oldPassword'
+    const { email, oldPassword } = req.body;  
 
     try {
       const user = await User.findOne({ email });
@@ -121,55 +110,69 @@ const get_user_security_questions = async (req, res) =>{
         };
 
 
-        const update_user_security_questions = async (req,res) =>{
 
-          const { email, newQuestions, newAnswers } = req.body;
-
+        
+        const update_user_security_questions = async (req, res) => {
+          const { email, securityQuestions } = req.body;
+        
           try {
             // Step 1: Find the user by email
             const user = await User.findOne({ email });
         
             if (!user) {
-              return res.status(404).json({ success: false, message: 'User not found.' });
+              return res.status(404).json({ success: false, message: "User not found." });
             }
         
-            // Step 2: Validate that the questions are not the same
-            if (newQuestions.question1 === newQuestions.question2) {
-              return res.status(400).json({ success: false, message: 'Security questions must be different.' });
+            // Step 2: Validate that exactly **two** questions are provided
+            if (!securityQuestions || securityQuestions.length !== 2) {
+              return res.status(400).json({
+                success: false,
+                message: "You must provide exactly two security questions.",
+              });
             }
         
-            if (!newAnswers.answer1 || !newAnswers.answer2) {
-              return res.status(400).json({ success: false, message: 'Answers must not be empty.' });
+            // Step 3: Validate that both questions are **unique**
+            const [firstQuestion, secondQuestion] = securityQuestions;
+            if (firstQuestion.question === secondQuestion.question) {
+              return res.status(400).json({
+                success: false,
+                message: "Security questions must be different.",
+              });
             }
         
-            // Step 3: Hash the new answers
-            const hashedAnswer1 = await bcrypt.hash(newAnswers.answer1, 10);
-            const hashedAnswer2 = await bcrypt.hash(newAnswers.answer2, 10);
+            // Step 4: Validate that both answers are **not empty**
+            if (!firstQuestion.answer || !secondQuestion.answer) {
+              return res.status(400).json({
+                success: false,
+                message: "Answers must not be empty.",
+              });
+            }
         
-            // Update the user's security questions and hashed answers
-            user.securityQuestions = [
-              { question: newQuestions.question1, answer: hashedAnswer1 },
-              { question: newQuestions.question2, answer: hashedAnswer2 }
-            ];
+            // ✅ Step 5: Assign the new security questions (WITHOUT hashing manually)
+            user.securityQuestions = {
+              questions: [firstQuestion.question, secondQuestion.question],
+              answers: [firstQuestion.answer, secondQuestion.answer], // Hashing will happen automatically in the model
+            };
         
-            // Save the updated user information
+            // ✅ Step 6: Save user (this triggers the pre-save hashing)
             await user.save();
         
-            // Step 4: Return success response
             return res.status(200).json({
               success: true,
-              message: 'Security questions updated successfully.',
+              message: "Security questions updated successfully.",
             });
         
           } catch (error) {
-            // Handle any errors
             console.error(error);
             return res.status(500).json({
               success: false,
-              message: 'Internal server error.',
+              message: "Internal server error.",
             });
           }
         };
+        
+       
+        
 
 
 

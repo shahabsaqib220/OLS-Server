@@ -98,24 +98,24 @@ const userpostads = async (req, res) => {
       userId: req.userId,
       category,
       brand,
-      model: adModel,  // Use the model or empty string if not provided
-      MobilePhone,
+      model: adModel, 
       price,
       description,
       location: {
-        type: locationData.type || "Point", // Default type to "Point" if not provided
-        coordinates: locationData.coordinates, // Ensure valid coordinates
-        readable: locationData.readable, // City name
+        type: locationData.type || "Point", 
+        coordinates: locationData.coordinates,
+        readable: locationData.readable,
       },
       condition,
       images: imageUrls,
       adStatus: "available",
+      default: () => new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) 
     });
 
     const savedAd = await newAd.save();
     return res.status(201).json(savedAd);
   } catch (error) {
-    console.error("Server error:", error.message); // Log the actual error message
+    console.error("Server error:", error.message); 
     return res.status(500).json({ message: "Server error" });
   }
 };
@@ -144,7 +144,7 @@ const userpostads = async (req, res) => {
   };
 
  const usereditads = async (req,res) =>{
-    // First we can get the Id of the ad we want to edit, from the client side.
+    
     try {
       const ad = await Ad.findById(req.params.id);
       if (!ad) {

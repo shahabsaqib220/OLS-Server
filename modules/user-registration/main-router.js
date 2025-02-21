@@ -2,10 +2,11 @@
 
 const express = require('express');
 const router = express.Router();
-const { sendOtp, verifyRegistrationOtp, userRegistration } = require("./user-registration-main")
+const { checkEmailExists, verifyRegistrationOtp, userRegistration } = require("./user-registration-main")
+const {validateEmail} = require("./emailMiddlware")
 
 
-router.post('/send-otp',sendOtp )
+router.post('/check-email',validateEmail,checkEmailExists )
 router.post('/verify-otp',verifyRegistrationOtp )
 router.post('/register',userRegistration )
 

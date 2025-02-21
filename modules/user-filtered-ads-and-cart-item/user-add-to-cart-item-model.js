@@ -19,9 +19,7 @@ const cartItemSchema = new mongoose.Schema({
     description: String,
     MobilePhone: String,
     condition: String,
-    location: {
-      readable: String, // or whatever structure you're using
-    },
+    location: String,
     images: [
       {
         url: String, // Adjust as necessary to store URL and alt for image

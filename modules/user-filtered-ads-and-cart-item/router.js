@@ -8,20 +8,61 @@ const connectDB = require('../../db');
 const Cart = require("../user-filtered-ads-and-cart-item/user-add-to-cart-item-model");
 connectDB();
 
+
+const search_listing = async (req,res) =>{
+
+  try {
+    const { term } = req.query;
+
+    if (!term) {
+        return res.status(400).json({ message: "Search term is required" });
+    }
+
+    // Create a regex pattern for case-insensitive, partial matching
+    const regex = new RegExp(term, "i");
+
+    // Search across multiple fields
+    const results = await Ad.find({
+      adStatus: "available",
+        $or: [
+            { category: regex },
+            { brand: regex },
+            { model: regex },
+            { mobilePhone: regex },
+            { condition: regex },
+            { location: regex }
+        ]
+    });
+
+    res.status(200).json(results);
+} catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+}
+
+
+
+}
+
+
+
+
+
 const user_filtered_ads = async (req, res) => {
   try {
     const { category, minPrice, maxPrice, location } = req.query;
 
+
     const filterCriteria = {
       ...(category && { category }),
-      ...(location && { 'location.readable': location }),
+      ...(location && {  location }),
       ...(minPrice && maxPrice && { price: { $gte: parseInt(minPrice), $lte: parseInt(maxPrice) } })
     };
 
     const ads = await Ad.find(filterCriteria);
 
     const uniqueCategories = await Ad.distinct('category');
-    const uniqueLocations = await Ad.distinct('location.readable');
+    const uniqueLocations = await Ad.distinct('location');
 
     res.json({
       ads,
@@ -209,4 +250,4 @@ const user_other_related_category = async (req, res) => {
 
 
 
-module.exports = {user_filtered_ads, user_add_to_cart_item, getting_users_cart_items, user_delete_cart_item, navigate_user_cart_item,user_other_related_category }
+module.exports = {user_filtered_ads,search_listing, user_add_to_cart_item, getting_users_cart_items, user_delete_cart_item, navigate_user_cart_item,user_other_related_category }

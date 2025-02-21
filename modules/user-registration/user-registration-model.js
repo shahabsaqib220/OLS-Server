@@ -14,16 +14,15 @@ const userSchema = new mongoose.Schema({
   ads: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Ad' }],
 });
 
-// Pre-save hook to hash the password and security answers
+
 userSchema.pre('save', async function (next) {
   try {
-    // Hash the password if it is modified
+  
     if (this.isModified('password')) {
       const salt = await bcrypt.genSalt(10);
       this.password = await bcrypt.hash(this.password, salt);
     }
 
-    // Hash the security answers if they are modified
     if (this.isModified('securityQuestions.answers')) {
       const hashedAnswers = [];
       for (let i = 0; i < this.securityQuestions.answers.length; i++) {
@@ -31,7 +30,7 @@ userSchema.pre('save', async function (next) {
         const hashedAnswer = await bcrypt.hash(this.securityQuestions.answers[i], salt);
         hashedAnswers.push(hashedAnswer);
       }
-      this.securityQuestions.answers = hashedAnswers; // Update with hashed answers
+      this.securityQuestions.answers = hashedAnswers;
     }
 
     next();

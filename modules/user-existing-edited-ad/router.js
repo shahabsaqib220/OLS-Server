@@ -20,6 +20,8 @@ const update_user_edited_ad = async (req, res) => {
   const updateData = req.body;
   const removedImages = req.body.removedImages ? JSON.parse(req.body.removedImages) : [];
 
+  console.log("Updated user ad data:", updateData);
+
   try {
     const existingAd = await Ad.findById(adId);
     if (!existingAd) {
@@ -29,7 +31,7 @@ const update_user_edited_ad = async (req, res) => {
     let updatedImages = [...existingAd.images];
     const newImageUrls = [];
 
-    // Handle new image uploads directly to Firebase Storage
+    // Handle new image uploads
     if (req.files && req.files.length > 0) {
       const bucket = admin.storage().bucket();
       const uploadPromises = req.files.map(file => {
@@ -39,14 +41,9 @@ const update_user_edited_ad = async (req, res) => {
             metadata: { contentType: file.mimetype },
           });
 
-          blobStream.on("error", (error) => {
-            console.error("Blob stream error:", error);
-            reject(error);
-          });
-
+          blobStream.on("error", reject);
           blobStream.on("finish", () => {
-            const publicUrl = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
-            newImageUrls.push(publicUrl);
+            newImageUrls.push(`https://storage.googleapis.com/${bucket.name}/${blob.name}`);
             resolve();
           });
 
@@ -54,19 +51,16 @@ const update_user_edited_ad = async (req, res) => {
         });
       });
 
-      // Wait for all uploads to finish
       await Promise.all(uploadPromises);
     }
 
-    // Remove images specified in `removedImages`
+    // Remove images
     for (const imageUrl of removedImages) {
       const fileName = imageUrl.split("/").pop();
       const file = admin.storage().bucket().file(`ads/${fileName}`);
-      await file.delete().catch((err) => {
-        console.error(`Failed to delete file ${fileName}:`, err.message);
-      });
+      await file.delete().catch(err => console.error(`Failed to delete ${fileName}:`, err.message));
 
-      updatedImages = updatedImages.filter((img) => img !== imageUrl);
+      updatedImages = updatedImages.filter(img => img !== imageUrl);
     }
 
     updatedImages.push(...newImageUrls);
@@ -77,36 +71,16 @@ const update_user_edited_ad = async (req, res) => {
 
     updateData.images = updatedImages;
 
-    // Handle location data if provided
-    if (updateData.location) {
-      let locationData;
-      try {
-        locationData = JSON.parse(updateData.location);
-      } catch (error) {
-        return res.status(400).json({ message: "Invalid location data format" });
-      }
-
-      if (
-        !locationData.readable ||
-        !Array.isArray(locationData.coordinates) ||
-        locationData.coordinates.length !== 2
-      ) {
-        return res.status(400).json({ message: "Invalid location data provided" });
-      }
-
-      updateData.location = {
-        type: "Point",
-        coordinates: [locationData.coordinates[0], locationData.coordinates[1]],
-        readable: locationData.readable,
-      };
+    // Keep location as a simple string
+    if (!updateData.location) {
+      updateData.location = existingAd.location; // Retain previous location if not provided
     }
 
-    // Reset premium, standard, and basic values to false
+    // Reset premium, standard, and basic values
     updateData.premium = false;
     updateData.standard = false;
     updateData.basic = false;
 
-    // Update the ad in the database
     const updatedAd = await Ad.findByIdAndUpdate(adId, updateData, {
       new: true,
       runValidators: true,
@@ -121,6 +95,7 @@ const update_user_edited_ad = async (req, res) => {
     res.status(500).json({ message: "An error occurred while updating the ad", error: error.message });
   }
 };
+
 
 
 const delete_user_ad = async (req, res) => {

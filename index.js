@@ -22,6 +22,7 @@ const userChatsRouter = require("./modules/users-chats/user-chats-router");
 const attachIO = require('./modules/controllers/socketMiddleware'); // Middleware to attach Socket.IO
 const initializeSockets = require('./modules/controllers/socketController'); 
 const userSellFastRouter = require("./modules/users-sell-fast-ads/router")
+const userForgetPasswordRouter = require("./modules/user-forget-password/router")
 
 // Connect to MongoDB
 connectDB();
@@ -63,6 +64,7 @@ app.use('/api/security/options', securityOptions);
 app.use('/api/filtering', filteredAds);
 app.use('/api/users-chats', userChatsRouter);
 app.use('/api/users-fast', userSellFastRouter);
+app.use('/api/user/passowrd', userForgetPasswordRouter);
 
 // Health check route
 app.get("/", (req, res) => {
